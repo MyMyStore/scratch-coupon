@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>스크래치 복권</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #f9f9f9;
+      font-family: sans-serif;
+    }
+
+    #scratch-card {
+      width: 100%;
+      max-width: 320px;
+      margin: 40px auto;
+      position: relative;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    #prize-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #222;
+      z-index: 1;
+      text-align: center;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="scratch-card">
+    <div id="prize-text">🎉 10% 할인 쿠폰 당첨!</div>
+    <canvas id="scratch-canvas" width="300" height="150"></canvas>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const canvas = document.getElementById("scratch-canvas");
+      const ctx = canvas.getContext("2d");
+      let isDrawing = false;
+
+      // 캔버스 크기 일치화 (브라우저마다 다를 수 있음)
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+
+      // 덮개 색상
+      ctx.fillStyle = "#999";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      function draw(x, y) {
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function checkScratchedArea() {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let total = imageData.data.length / 4;
+        let transparent = 0;
+
+        for (let i = 3; i < imageData.data.length; i += 4) {
+          if (imageData.data[i] === 0) transparent++;
+        }
+
+        const ratio = transparent / total;
+        if (ratio > 0.5) {
+          canvas.style.display = "none"; // 긁은 면적 50% 이상일 때 자동 공개
+        }
+      }
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        return { x, y };
+      }
+
+      canvas.addEventListener("mousedown", () => (isDrawing = true));
+      canvas.addEventListener("mouseup", () => (isDrawing = false));
+      canvas.addEventListener("mousemove", (e) => {
+        if (!isDrawing) return;
+        const { x, y } = getPos(e);
+        draw(x, y);
+        checkScratchedArea();
+      });
+
+      canvas.addEventListener("touchstart", () => (isDrawing = true));
+      canvas.addEventListener("touchend", () => (isDrawing = false));
+      canvas.addEventListener("touchmove", (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const { x, y } = getPos(e);
+        draw(x, y);
+        checkScratchedArea();
+      }, { passive: false });
+
+      // 중복 긁기 방지 (1회만 참여)
+      if (localStorage.getItem("alreadyScratched")) {
+        document.getElementById("scratch-canvas").style.display = "none";
+      } else {
+        localStorage.setItem("alreadyScratched", "true");
+      }
+    });
+  </script>
+</body>
+</html>
