@@ -1,110 +1,601 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>스크래치 쿠폰</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #f5f5f5;
-      font-family: sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스크래치 쿠폰</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 무한스크롤 방지 */
+        }
+        
+        .scratch-card-container {
+            width: 800px;
+            height: 450px; /* 고정 높이 설정 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #ffedff 0%, #e6f7ff 100%);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden; /* 내용이 넘치지 않도록 설정 */
+        }
+        
+        .scratch-card {
+            position: relative;
+            width: 350px;
+            height: 220px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            transition: transform 0.3s ease;
+        }
+        
+        .scratch-card:hover {
+            transform: translateY(-5px) rotateY(5deg);
+        }
+        
+        .card-inner {
+            padding: 24px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #fff8e1 0%, #fff 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #ff6b9b;
+            margin: 0;
+        }
+        
+        .brand-logo {
+            font-size: 1.2rem;
+            color: #6b66ff;
+        }
+        
+        .card-content {
+            text-align: center;
+            position: relative;
+        }
+        
+        .scratch-area {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .prize-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            z-index: 1;
+            position: absolute;
+            color: #ff6b9b;
+        }
+        
+        #scratch-canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 8px;
+        }
+        
+        .instruction {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .card-footer {
+            font-size: 0.7rem;
+            color: #aaa;
+            text-align: center;
+        }
+        
+        .decorations {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .decoration {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(255, 107, 155, 0.2);
+            animation: float 4s infinite ease-in-out;
+        }
+        
+        .decoration:nth-child(1) {
+            top: 20px;
+            left: 20px;
+            width: 25px;
+            height: 25px;
+            background: rgba(107, 102, 255, 0.2);
+            animation-delay: 0s;
+        }
+        
+        .decoration:nth-child(2) {
+            top: 50px;
+            right: 20px;
+            width: 15px;
+            height: 15px;
+            background: rgba(255, 107, 155, 0.2);
+            animation-delay: 1s;
+        }
+        
+        .decoration:nth-child(3) {
+            bottom: 30px;
+            left: 40px;
+            width: 20px;
+            height: 20px;
+            background: rgba(107, 102, 255, 0.2);
+            animation-delay: 2s;
+        }
+        
+        .decoration:nth-child(4) {
+            bottom: 20px;
+            right: 45px;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 107, 155, 0.2);
+            animation-delay: 3s;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .shimmer {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 3s infinite;
+            z-index: 1;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        .card-side-decoration {
+            position: absolute;
+            right: -50px;
+            bottom: -50px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 107, 155, 0.1), rgba(107, 102, 255, 0.1));
+            z-index: 0;
+        }
 
-    .container {
-      position: relative;
-      width: 320px;
-      margin: 40px auto;
-    }
-
-    .container img {
-      width: 100%;
-      display: block;
-    }
-
-    #reward-text {
-      position: absolute;
-      top: 48%;
-      left: 65%;
-      transform: translate(-50%, -50%);
-      font-size: 18px;
-      font-weight: bold;
-      color: #d72222;
-      z-index: 1;
-      pointer-events: none; /* 캔버스 클릭 막지 않도록 */
-      user-select: none;
-    }
-
-    canvas#scratch {
-      position: absolute;
-      top: 48%;
-      left: 65%;
-      transform: translate(-50%, -50%);
-      width: 130px;
-      height: 50px;
-      background: #ccc;
-      border-radius: 12px;
-      cursor: crosshair;
-      z-index: 2;
-    }
-  </style>
+        .card-side-decoration-2 {
+            position: absolute;
+            left: -30px;
+            top: -30px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(107, 102, 255, 0.1), rgba(255, 107, 155, 0.1));
+            z-index: 0;
+        }
+        
+        .info-section {
+            margin-left: 2rem;
+            max-width: 300px;
+        }
+        
+        .info-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff6b9b;
+            margin-bottom: 1rem;
+        }
+        
+        .info-description {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-instructions {
+            font-size: 0.8rem;
+            color: #888;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid #6b66ff;
+        }
+        
+        .info-instruction-title {
+            font-weight: 700;
+            color: #6b66ff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-instruction-step {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+        
+        .step-number {
+            width: 20px;
+            height: 20px;
+            background: #6b66ff;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            margin-right: 8px;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ff6b9b;
+            opacity: 0;
+            z-index: 100;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png" alt="쿠폰 이미지">
-    <div id="reward-text"></div>
-    <canvas id="scratch"></canvas>
-  </div>
+    <div class="scratch-card-container">
+        <div class="scratch-card">
+            <div class="card-inner">
+                <div class="shimmer"></div>
+                <div class="card-side-decoration"></div>
+                <div class="card-side-decoration-2"></div>
+                
+                <div class="card-header">
+                    <h2 class="card-title">SPECIAL DISCOUNT</h2>
+                    <div class="brand-logo">♥</div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="scratch-area">
+                        <div class="prize-text" id="prize-text"></div>
+                        <canvas id="scratch-canvas"></canvas>
+                    </div>
+                    <p class="instruction">마우스나 손가락으로 긁어서 할인율을 확인하세요!</p>
+                </div>
+                
+                <div class="card-footer">
+                    유효기간: 발급일로부터 30일 이내
+                </div>
+                
+                <div class="decorations">
+                    <div class="decoration"></div>
+                    <div class="decoration"></div>
+                    <div class="decoration"></div>
+                    <div class="decoration"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3 class="info-title">행운의 스크래치 쿠폰</h3>
+            <p class="info-description">
+                쿠폰을 긁어 특별한 할인 혜택을 받아보세요! 최대 40%까지 할인 받을 수 있는 기회를 놓치지 마세요.
+            </p>
+            
+            <div class="info-instructions">
+                <p class="info-instruction-title">이용 방법</p>
+                <div class="info-instruction-step">
+                    <div class="step-number">1</div>
+                    <div>쿠폰 영역을 마우스로 긁어주세요</div>
+                </div>
+                <div class="info-instruction-step">
+                    <div class="step-number">2</div>
+                    <div>당첨 결과를 확인하세요</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <script>
-    const canvas = document.getElementById("scratch");
-    const ctx = canvas.getContext("2d");
-    const rewardText = document.getElementById("reward-text");
-    let isDrawing = false;
-
-    // 보상 텍스트 랜덤 선택
-    const rewards = ["10% OFF", "20% OFF", "30% OFF", "무료배송", "5천원 할인"];
-    const selected = rewards[Math.floor(Math.random() * rewards.length)];
-    rewardText.textContent = selected;
-
-    function setCanvasSize() {
-      // 스타일 기준 사이즈 가져오기
-      const style = getComputedStyle(canvas);
-      const width = parseInt(style.width);
-      const height = parseInt(style.height);
-      canvas.width = width;
-      canvas.height = height;
-
-      ctx.fillStyle = "#ccc";
-      ctx.fillRect(0, 0, width, height);
-    }
-
-    window.addEventListener("load", setCanvasSize);
-    window.addEventListener("resize", setCanvasSize);
-
-    canvas.addEventListener("mousedown", (e) => {
-      isDrawing = true;
-      draw(e);
-    });
-
-    canvas.addEventListener("mousemove", (e) => {
-      if (isDrawing) draw(e);
-    });
-
-    canvas.addEventListener("mouseup", () => {
-      isDrawing = false;
-    });
-
-    function draw(e) {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.beginPath();
-      ctx.arc(x, y, 15, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 스크래치 카드 초기화
+            initScratchCard();
+            
+            // 당첨 결과 생성 (50% 확률로 꽝, 나머지는 20%, 30%, 40% 할인)
+            determineResult();
+        });
+        
+        function initScratchCard() {
+            const canvas = document.getElementById('scratch-canvas');
+            const ctx = canvas.getContext('2d');
+            const scratchArea = document.querySelector('.scratch-area');
+            
+            // 캔버스 크기 설정
+            canvas.width = scratchArea.offsetWidth;
+            canvas.height = scratchArea.offsetHeight;
+            
+            // 스크래치 영역 그리기 (회색 배경)
+            ctx.fillStyle = '#DDDDDD';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 스크래치 패턴 추가
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const radius = Math.random() * 2 + 1;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#CCCCCC';
+                ctx.fill();
+            }
+            
+            // 메시지 추가
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#888888';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('이곳을 긁어주세요', canvas.width / 2, canvas.height / 2);
+            
+            // 마우스/터치 이벤트 처리
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let scratchPercentage = 0;
+            
+            function getPosition(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                return { x, y };
+            }
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                const pos = getPosition(e);
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                
+                const pos = getPosition(e);
+                const currentX = pos.x;
+                const currentY = pos.y;
+                
+                // 지우개 효과
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineWidth = 25;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+                
+                lastX = currentX;
+                lastY = currentY;
+                
+                // 지워진 영역 계산
+                calculateScratchPercentage();
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            function calculateScratchPercentage() {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixelData = imageData.data;
+                let transparentPixels = 0;
+                
+                for (let i = 3; i < pixelData.length; i += 4) {
+                    if (pixelData[i] === 0) {
+                        transparentPixels++;
+                    }
+                }
+                
+                const totalPixels = canvas.width * canvas.height;
+                scratchPercentage = (transparentPixels / totalPixels) * 100;
+                
+                // 40% 이상 지워졌을 때 전체 공개
+                if (scratchPercentage > 40 && canvas.style.opacity !== '0') {
+                    revealAll();
+                }
+            }
+            
+            function revealAll() {
+                // 애니메이션으로 캔버스 투명화
+                let opacity = 1;
+                const fadeInterval = setInterval(() => {
+                    opacity -= 0.1;
+                    canvas.style.opacity = opacity;
+                    
+                    if (opacity <= 0) {
+                        clearInterval(fadeInterval);
+                        canvas.style.display = 'none';
+                        
+                        // 당첨시 축하 효과 (꽝이 아닌 경우)
+                        if (document.getElementById('prize-text').textContent !== '꽝') {
+                            createConfetti();
+                        }
+                    }
+                }, 30);
+            }
+            
+            // 이벤트 리스너 등록
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+            
+            // 터치 이벤트
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+        
+        function determineResult() {
+            const prizeText = document.getElementById('prize-text');
+            const random = Math.random();
+            
+            // 50% 확률로 꽝, 나머지 50%는 할인 쿠폰
+            if (random < 0.5) {
+                prizeText.textContent = '꽝';
+                prizeText.style.color = '#888888';
+            } else {
+                // 나머지 50% 중에서 할인율 결정 (20%, 30%, 40%)
+                const discountRandom = Math.random();
+                
+                if (discountRandom < 0.33) {
+                    prizeText.textContent = '20% 할인';
+                    prizeText.style.color = '#ff9d66';
+                } else if (discountRandom < 0.66) {
+                    prizeText.textContent = '30% 할인';
+                    prizeText.style.color = '#ff6b9b';
+                } else {
+                    prizeText.textContent = '40% 할인';
+                    prizeText.style.color = '#6b66ff';
+                }
+            }
+        }
+        
+        function createConfetti() {
+            const confettiCount = 100;
+            const container = document.querySelector('.scratch-card-container');
+            
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // 랜덤 색상
+                const colors = ['#ff6b9b', '#6b66ff', '#66d7ff', '#ffdb66'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.backgroundColor = randomColor;
+                
+                // 랜덤 크기
+                const size = Math.random() * 10 + 5;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                
+                // 랜덤 모양
+                const shapes = ['circle', 'square', 'rectangle'];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                
+                if (shape === 'circle') {
+                    confetti.style.borderRadius = '50%';
+                } else if (shape === 'rectangle') {
+                    confetti.style.width = `${size * 1.5}px`;
+                    confetti.style.height = `${size * 0.5}px`;
+                }
+                
+                // 랜덤 위치 (카드 중앙에서 시작)
+                const card = document.querySelector('.scratch-card');
+                const cardRect = card.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                
+                const startX = cardRect.left - containerRect.left + cardRect.width / 2;
+                const startY = cardRect.top - containerRect.top + cardRect.height / 2;
+                
+                confetti.style.left = `${startX}px`;
+                confetti.style.top = `${startY}px`;
+                
+                // 애니메이션 추가
+                const animationDuration = Math.random() * 3 + 2;
+                const keyFrameName = `confetti_${i}`;
+                
+                // 스타일 요소 생성
+                const styleElement = document.createElement('style');
+                container.appendChild(confetti);
+                
+                // 랜덤 방향으로 날리기
+                const angle = Math.random() * 360;
+                const distance = Math.random() * 200 + 50;
+                styleElement.textContent = `
+                    @keyframes ${keyFrameName} {
+                        0% {
+                            transform: translate(0, 0) rotate(0deg);
+                            opacity: 1;
+                        }
+                        100% {
+                            transform: translate(${Math.cos(angle * Math.PI/180) * distance}px, ${Math.sin(angle * Math.PI/180) * distance}px) rotate(${Math.random() * 360}deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                
+                document.head.appendChild(styleElement);
+                confetti.style.animation = `${keyFrameName} ${animationDuration}s ease-out forwards`;
+                
+                // 애니메이션 끝나면 제거
+                setTimeout(() => {
+                    if(container.contains(confetti)) {
+                        container.removeChild(confetti);
+                    }
+                    if(document.head.contains(styleElement)) {
+                        document.head.removeChild(styleElement);
+                    }
+                }, animationDuration * 1000);
+            }
+        }
+    </script>
 </body>
 </html>
