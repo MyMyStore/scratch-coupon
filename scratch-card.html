@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scratch Coupon</title>
+  <style>
+    body {
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      position: relative;
+      width: 320px;
+      height: 200px;
+    }
+    .coupon-img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 12px;
+    }
+    canvas {
+      position: absolute;
+      top: 145px;  /* 스크래치 영역 위치 조정 */
+      left: 0;
+      width: 100%;
+      height: 55px;
+      border-radius: 0 0 12px 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="raw url 가져와야 된다" alt="coupon" class="coupon-img" />
+    <canvas id="scratchCanvas" width="320" height="55"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+
+    // 은박 스타일 그리기
+    function drawMask() {
+      ctx.fillStyle = '#ccc';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function clearCircle(x, y) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 15, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    canvas.addEventListener('mousedown', () => isDrawing = true);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      clearCircle(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    // 모바일 터치도 지원
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      clearCircle(touch.clientX - rect.left, touch.clientY - rect.top);
+    });
+
+    drawMask();
+  </script>
+</body>
+</html>
