@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>랜덤 스크래치 쿠폰</title>
+  <title>스크래치 쿠폰</title>
   <style>
     body {
       margin: 0;
@@ -13,14 +13,12 @@
 
     .container {
       position: relative;
-      width: 1017px; /* 이미지 실제 크기 */
-      height: auto;
-      margin: 0 auto;
+      width: 320px;
+      margin: 40px auto;
     }
 
     .container img {
       width: 100%;
-      height: auto;
       display: block;
     }
 
@@ -29,7 +27,7 @@
       top: 48%;
       left: 65%;
       transform: translate(-50%, -50%);
-      font-size: 26px;
+      font-size: 18px;
       font-weight: bold;
       color: #d72222;
       z-index: 1;
@@ -42,10 +40,10 @@
       top: 48%;
       left: 65%;
       transform: translate(-50%, -50%);
-      width: 250px;
-      height: 100px;
+      width: 130px;
+      height: 50px;
       background: #ccc;
-      border-radius: 16px;
+      border-radius: 12px;
       cursor: crosshair;
       z-index: 2;
     }
@@ -54,7 +52,6 @@
 <body>
   <div class="container">
     <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png" alt="스크래치 쿠폰" />
-
     <div id="reward-text"></div>
     <canvas id="scratch"></canvas>
   </div>
@@ -65,7 +62,7 @@
     const rewardText = document.getElementById("reward-text");
     let isDrawing = false;
 
-    // 보상 텍스트 랜덤 선택
+    // 랜덤 보상 설정
     const rewards = ["10% OFF", "20% OFF", "30% OFF", "무료배송", "5천원 할인"];
     const selected = rewards[Math.floor(Math.random() * rewards.length)];
     rewardText.textContent = selected;
@@ -102,7 +99,7 @@
 
       ctx.globalCompositeOperation = "destination-out";
       ctx.beginPath();
-      ctx.arc(x, y, 20, 0, Math.PI * 2);
+      ctx.arc(x, y, 15, 0, Math.PI * 2);
       ctx.fill();
     }
   </script>
