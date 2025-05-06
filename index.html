@@ -1,83 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Scratch Coupon</title>
+  <title>랜덤 스크래치 쿠폰</title>
   <style>
     body {
       margin: 0;
-      background: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      padding: 0;
+      background: #f5f5f5;
+      font-family: sans-serif;
     }
 
     .container {
       position: relative;
       width: 100%;
-      max-width: 1030px;
-      aspect-ratio: 1030 / 625;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 720px;
+      margin: 0 auto;
     }
 
-    .coupon-img {
+    .container img {
       width: 100%;
-      height: auto;
       display: block;
     }
 
-    .scratch-area {
+    #reward-text {
       position: absolute;
-      top: 20%;
-      left: 61%;
-      width: 36%;
-      height: 21.6%;
+      top: 54%;
+      left: 70%;
+      transform: translate(-50%, -50%);
+      font-size: 26px;
+      font-weight: bold;
+      color: #d72222;
+      z-index: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    canvas#scratch {
+      position: absolute;
+      top: 54%;
+      left: 70%;
+      transform: translate(-50%, -50%);
+      width: 38%;
+      height: 17%;
+      background: #ccc;
       border-radius: 16px;
-      pointer-events: auto;
+      cursor: crosshair;
+      z-index: 2;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png"
-         alt="coupon" class="coupon-img" />
-    <canvas id="scratchCanvas" class="scratch-area"></canvas>
+    <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png" alt="스크래치 쿠폰" />
+
+    <div id="reward-text"></div>
+    <canvas id="scratch"></canvas>
   </div>
 
   <script>
-    const canvas = document.getElementById('scratchCanvas');
-    const ctx = canvas.getContext('2d');
-    let scratched = false;
+    const canvas = document.getElementById("scratch");
+    const ctx = canvas.getContext("2d");
+    const rewardText = document.getElementById("reward-text");
+    let isDrawing = false;
+
+    // 랜덤 보상 선택
+    const rewards = ["10% OFF", "20% OFF", "30% OFF", "무료배송", "5천원 할인"];
+    const selected = rewards[Math.floor(Math.random() * rewards.length)];
+    rewardText.textContent = selected;
 
     function resizeCanvas() {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
-      drawMask();
-    }
 
-    function drawMask() {
-      ctx.fillStyle = '#ccc';  // 은색 느낌
+      ctx.fillStyle = "#ccc";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    function clearAll() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function scratchStart() {
-      if (!scratched) {
-        scratched = true;
-        setTimeout(clearAll, 200);
-      }
-    }
-
-    canvas.addEventListener('mousedown', scratchStart);
-    canvas.addEventListener('touchstart', scratchStart);
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('load', resizeCanvas);
 
-    resizeCanvas(); // 초기 실행
+    canvas.addEventListener("mousedown", (e) => {
+      isDrawing = true;
+      draw(e);
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (isDrawing) draw(e);
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      isDrawing = false;
+    });
+
+    function draw(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      ctx.arc(x, y, 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
   </script>
 </body>
 </html>
