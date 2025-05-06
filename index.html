@@ -358,7 +358,7 @@
             // 스크래치 카드 초기화
             initScratchCard();
             
-            // 당첨 결과 생성 (50% 확률로 꽝, 나머지는 20%, 30%, 40% 할인)
+            // 당첨 결과 생성 (50% 확률로 꽝, 나머지 50%는 20%, 30%, 40% 할인)
             determineResult();
         });
         
@@ -469,14 +469,20 @@
                     
                     if (opacity <= 0) {
                         clearInterval(fadeInterval);
-                        canvas.style.display = 'none';
+                        canvas.style.display = 'none'; // 캔버스를 숨김
+                        
+                        // 스크래치 완료 후, 화면 새로 고침
+                        setTimeout(() => {
+                            // 여기서 캐시를 무효화하여 문제 해결
+                            canvas.width = canvas.width;  // 캔버스를 재설정하여 캐시 제거
+                            instructionText.textContent = "당첨 결과를 확인했습니다. 더 이상 긁을 수 없습니다.";  // 안내 메시지
+                        }, 300);
                         
                         // 당첨시 축하 효과 (꽝이 아닌 경우)
                         if (document.getElementById('prize-text').textContent !== '꽝') {
                             createConfetti();
                         }
                         scratchCompleted = true;  // 스크래치 완료 처리
-                        instructionText.textContent = "당첨 결과를 확인했습니다. 더 이상 긁을 수 없습니다.";  // 안내 메시지
                     }
                 }, 30);
             }
