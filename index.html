@@ -35,7 +35,7 @@
       user-select: none;
     }
 
-    canvas#scratch {
+    #scratch {
       position: absolute;
       top: 48%;
       left: 65%;
@@ -51,7 +51,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png" alt="스크래치 쿠폰" />
+    <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png" alt="쿠폰 이미지">
     <div id="reward-text"></div>
     <canvas id="scratch"></canvas>
   </div>
@@ -62,22 +62,24 @@
     const rewardText = document.getElementById("reward-text");
     let isDrawing = false;
 
-    // 랜덤 보상 설정
     const rewards = ["10% OFF", "20% OFF", "30% OFF", "무료배송", "5천원 할인"];
     const selected = rewards[Math.floor(Math.random() * rewards.length)];
     rewardText.textContent = selected;
 
     function resizeCanvas() {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      // 실제 픽셀 크기 설정
+      const style = getComputedStyle(canvas);
+      const width = parseInt(style.width);
+      const height = parseInt(style.height);
+      canvas.width = width;
+      canvas.height = height;
 
       ctx.fillStyle = "#ccc";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, width, height);
     }
 
-    window.addEventListener('load', resizeCanvas);
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener("load", resizeCanvas);
+    window.addEventListener("resize", resizeCanvas);
 
     canvas.addEventListener("mousedown", (e) => {
       isDrawing = true;
