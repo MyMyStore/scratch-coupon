@@ -1,120 +1,115 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>스크래치 쿠폰</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: sans-serif;
-      background: #f8f8f8;
+      background: #f0f0f0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
-
-    #card {
+    #coupon {
       position: relative;
-      width: 300px;
-      height: 150px;
+      width: 320px;
+      height: 160px;
+      background: white;
       border-radius: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.15);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       overflow: hidden;
-      background: #fff;
     }
-
-    #prize {
+    #text {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 20px;
       font-weight: bold;
-      z-index: 1;
       color: #333;
+      z-index: 1;
     }
-
     canvas {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       z-index: 2;
     }
   </style>
 </head>
 <body>
-  <div id="card">
-    <div id="prize">🎁 무료배송 쿠폰 당첨!</div>
-    <canvas id="cover"></canvas>
+  <div id="coupon">
+    <div id="text">✨ 축하합니다! 20% 할인쿠폰!</div>
+    <canvas id="canvas" width="320" height="160"></canvas>
   </div>
 
   <script>
-    window.onload = () => {
-      const canvas = document.getElementById("cover");
+    window.addEventListener("load", () => {
+      const canvas = document.getElementById("canvas");
       const ctx = canvas.getContext("2d");
-      const container = document.getElementById("card");
 
-      canvas.width = container.offsetWidth;
-      canvas.height = container.offsetHeight;
-
+      // 스크래치 코팅 레이어 그리기
       ctx.fillStyle = "#bbb";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       let isDrawing = false;
 
-      function draw(x, y) {
+      const getPosition = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: (e.clientX || e.touches[0].clientX) - rect.left,
+          y: (e.clientY || e.touches[0].clientY) - rect.top
+        };
+      };
+
+      const draw = (x, y) => {
         ctx.globalCompositeOperation = "destination-out";
         ctx.beginPath();
         ctx.arc(x, y, 20, 0, Math.PI * 2);
         ctx.fill();
-      }
+      };
 
-      function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
-        return { x, y };
-      }
-
-      function checkClear() {
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let clearCount = 0;
-        for (let i = 3; i < imgData.data.length; i += 4) {
-          if (imgData.data[i] === 0) clearCount++;
+      const checkCleared = () => {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let cleared = 0;
+        for (let i = 3; i < imageData.data.length; i += 4) {
+          if (imageData.data[i] === 0) cleared++;
         }
-        if (clearCount / (imgData.data.length / 4) > 0.5) {
+        if (cleared / (imageData.data.length / 4) > 0.5) {
           canvas.style.display = "none";
         }
-      }
+      };
 
-      // 마우스
-      canvas.addEventListener("mousedown", () => (isDrawing = true));
-      canvas.addEventListener("mouseup", () => (isDrawing = false));
-      canvas.addEventListener("mousemove", (e) => {
+      canvas.addEventListener("mousedown", () => isDrawing = true);
+      canvas.addEventListener("mouseup", () => isDrawing = false);
+      canvas.addEventListener("mousemove", e => {
         if (!isDrawing) return;
-        const { x, y } = getPos(e);
-        draw(x, y);
-        checkClear();
+        const pos = getPosition(e);
+        draw(pos.x, pos.y);
+        checkCleared();
       });
 
-      // 터치
-      canvas.addEventListener("touchstart", () => (isDrawing = true));
-      canvas.addEventListener("touchend", () => (isDrawing = false));
-      canvas.addEventListener("touchmove", (e) => {
+      canvas.addEventListener("touchstart", e => {
+        isDrawing = true;
+      }, { passive: false });
+
+      canvas.addEventListener("touchend", e => {
+        isDrawing = false;
+      }, { passive: false });
+
+      canvas.addEventListener("touchmove", e => {
         e.preventDefault();
         if (!isDrawing) return;
-        const { x, y } = getPos(e);
-        draw(x, y);
-        checkClear();
+        const pos = getPosition(e);
+        draw(pos.x, pos.y);
+        checkCleared();
       }, { passive: false });
-    };
+    });
   </script>
 </body>
 </html>
