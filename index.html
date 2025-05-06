@@ -15,24 +15,24 @@
 
     .container {
       position: relative;
-      width: 1017px;
-      height: 609px;
+      width: 100%;
+      max-width: 1030px;
+      aspect-ratio: 1030 / 625;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      overflow: hidden;
     }
 
     .coupon-img {
-      width: 1017px;
-      height: 609px;
+      width: 100%;
+      height: auto;
       display: block;
     }
 
-    canvas {
+    .scratch-area {
       position: absolute;
-      top: 100px;
-      left: 510px;
-      width: 470px;
-      height: 160px;
+      top: 20%;
+      left: 61%;
+      width: 36%;
+      height: 21.6%;
       border-radius: 16px;
       pointer-events: auto;
     }
@@ -40,9 +40,9 @@
 </head>
 <body>
   <div class="container">
-    <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png" 
+    <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png"
          alt="coupon" class="coupon-img" />
-    <canvas id="scratchCanvas" width="470" height="160"></canvas>
+    <canvas id="scratchCanvas" class="scratch-area"></canvas>
   </div>
 
   <script>
@@ -50,8 +50,15 @@
     const ctx = canvas.getContext('2d');
     let scratched = false;
 
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      drawMask();
+    }
+
     function drawMask() {
-      ctx.fillStyle = '#ccc'; // 은색 마스킹
+      ctx.fillStyle = '#ccc';  // 은색 느낌
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
@@ -68,8 +75,9 @@
 
     canvas.addEventListener('mousedown', scratchStart);
     canvas.addEventListener('touchstart', scratchStart);
+    window.addEventListener('resize', resizeCanvas);
 
-    drawMask();
+    resizeCanvas(); // 초기 실행
   </script>
 </body>
 </html>
