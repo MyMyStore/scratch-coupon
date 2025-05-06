@@ -31,11 +31,11 @@
       font-weight: bold;
       color: #d72222;
       z-index: 1;
-      pointer-events: none;
+      pointer-events: none; /* 캔버스 클릭 막지 않도록 */
       user-select: none;
     }
 
-    #scratch {
+    canvas#scratch {
       position: absolute;
       top: 48%;
       left: 65%;
@@ -62,12 +62,13 @@
     const rewardText = document.getElementById("reward-text");
     let isDrawing = false;
 
+    // 보상 텍스트 랜덤 선택
     const rewards = ["10% OFF", "20% OFF", "30% OFF", "무료배송", "5천원 할인"];
     const selected = rewards[Math.floor(Math.random() * rewards.length)];
     rewardText.textContent = selected;
 
-    function resizeCanvas() {
-      // 실제 픽셀 크기 설정
+    function setCanvasSize() {
+      // 스타일 기준 사이즈 가져오기
       const style = getComputedStyle(canvas);
       const width = parseInt(style.width);
       const height = parseInt(style.height);
@@ -78,8 +79,8 @@
       ctx.fillRect(0, 0, width, height);
     }
 
-    window.addEventListener("load", resizeCanvas);
-    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("load", setCanvasSize);
+    window.addEventListener("resize", setCanvasSize);
 
     canvas.addEventListener("mousedown", (e) => {
       isDrawing = true;
