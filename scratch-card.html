@@ -5,72 +5,69 @@
   <title>Scratch Coupon</title>
   <style>
     body {
-      background: #f2f2f2;
+      margin: 0;
+      background: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
+
     .container {
       position: relative;
-      width: 320px;
-      height: 200px;
+      width: 1017px;
+      height: 609px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
+
     .coupon-img {
-      width: 100%;
-      height: 100%;
+      width: 1017px;
+      height: 609px;
       display: block;
-      border-radius: 12px;
     }
+
     canvas {
       position: absolute;
-      top: 145px;  /* 스크래치 영역 위치 조정 */
-      left: 0;
-      width: 100%;
-      height: 55px;
-      border-radius: 0 0 12px 12px;
+      top: 100px;
+      left: 510px;
+      width: 470px;
+      height: 160px;
+      border-radius: 16px;
+      pointer-events: auto;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="raw url 가져와야 된다" alt="coupon" class="coupon-img" />
-    <canvas id="scratchCanvas" width="320" height="55"></canvas>
+    <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FGkvvk%2FbtsNJZ1g2Hg%2F0AAc9XMQhcLVNCu2EOOFEK%2Fimg.png" 
+         alt="coupon" class="coupon-img" />
+    <canvas id="scratchCanvas" width="470" height="160"></canvas>
   </div>
 
   <script>
     const canvas = document.getElementById('scratchCanvas');
     const ctx = canvas.getContext('2d');
-    let isDrawing = false;
+    let scratched = false;
 
-    // 은박 스타일 그리기
     function drawMask() {
-      ctx.fillStyle = '#ccc';
+      ctx.fillStyle = '#ccc'; // 은색 마스킹
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    function clearCircle(x, y) {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.beginPath();
-      ctx.arc(x, y, 15, 0, Math.PI * 2);
-      ctx.fill();
+    function clearAll() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mousemove', (e) => {
-      if (!isDrawing) return;
-      const rect = canvas.getBoundingClientRect();
-      clearCircle(e.clientX - rect.left, e.clientY - rect.top);
-    });
+    function scratchStart() {
+      if (!scratched) {
+        scratched = true;
+        setTimeout(clearAll, 200);
+      }
+    }
 
-    // 모바일 터치도 지원
-    canvas.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      clearCircle(touch.clientX - rect.left, touch.clientY - rect.top);
-    });
+    canvas.addEventListener('mousedown', scratchStart);
+    canvas.addEventListener('touchstart', scratchStart);
 
     drawMask();
   </script>
