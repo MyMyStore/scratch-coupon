@@ -13,20 +13,21 @@
 
     .container {
       position: relative;
-      width: 100%;
-      max-width: 720px;
+      width: 1017px; /* 이미지 실제 크기 */
+      height: auto;
       margin: 0 auto;
     }
 
     .container img {
       width: 100%;
+      height: auto;
       display: block;
     }
 
     #reward-text {
       position: absolute;
-      top: 54%;
-      left: 70%;
+      top: 48%;
+      left: 65%;
       transform: translate(-50%, -50%);
       font-size: 26px;
       font-weight: bold;
@@ -38,11 +39,11 @@
 
     canvas#scratch {
       position: absolute;
-      top: 54%;
-      left: 70%;
+      top: 48%;
+      left: 65%;
       transform: translate(-50%, -50%);
-      width: 38%;
-      height: 17%;
+      width: 250px;
+      height: 100px;
       background: #ccc;
       border-radius: 16px;
       cursor: crosshair;
@@ -64,7 +65,7 @@
     const rewardText = document.getElementById("reward-text");
     let isDrawing = false;
 
-    // 랜덤 보상 선택
+    // 보상 텍스트 랜덤 선택
     const rewards = ["10% OFF", "20% OFF", "30% OFF", "무료배송", "5천원 할인"];
     const selected = rewards[Math.floor(Math.random() * rewards.length)];
     rewardText.textContent = selected;
@@ -78,8 +79,8 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    window.addEventListener('resize', resizeCanvas);
     window.addEventListener('load', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
 
     canvas.addEventListener("mousedown", (e) => {
       isDrawing = true;
