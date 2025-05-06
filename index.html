@@ -366,28 +366,18 @@
             const canvas = document.getElementById('scratch-canvas');
             const ctx = canvas.getContext('2d');
             const scratchArea = document.querySelector('.scratch-area');
+            const prizeText = document.getElementById('prize-text');
+            const instructionText = document.querySelector('.instruction');
             
             // 캔버스 크기 설정
             canvas.width = scratchArea.offsetWidth;
             canvas.height = scratchArea.offsetHeight;
             
-            // 스크래치 영역 그리기 (회색 배경)
-            ctx.fillStyle = '#DDDDDD';
+            // 초기 상태에서 스크래치 영역을 덮는 마스크 추가
+            ctx.fillStyle = '#DDDDDD';  // 회색으로 덮어 스크래치 영역을 가림
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 스크래치 패턴 추가
-            for (let i = 0; i < 100; i++) {
-                const x = Math.random() * canvas.width;
-                const y = Math.random() * canvas.height;
-                const radius = Math.random() * 2 + 1;
-                
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#CCCCCC';
-                ctx.fill();
-            }
-            
-            // 메시지 추가
+            // 초기 메시지 추가 (긁어주세요)
             ctx.font = '14px sans-serif';
             ctx.fillStyle = '#888888';
             ctx.textAlign = 'center';
@@ -399,7 +389,8 @@
             let lastX = 0;
             let lastY = 0;
             let scratchPercentage = 0;
-            
+            let scratchCompleted = false;  // 스크래치 완료 여부
+
             function getPosition(e) {
                 const rect = canvas.getBoundingClientRect();
                 const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
@@ -408,6 +399,13 @@
             }
             
             function startDrawing(e) {
+                // 스크래치를 이미 다 한 경우에는 더 이상 시작하지 않도록 설정
+                if (scratchCompleted) {
+                    // 스크래치 완료 후, "오늘 참여 완료하였습니다. 다음 기회에!" 메시지 표시
+                    instructionText.textContent = "오늘 참여 완료하였습니다. 다음 기회에!";
+                    return;
+                }
+                
                 isDrawing = true;
                 const pos = getPosition(e);
                 lastX = pos.x;
@@ -456,8 +454,8 @@
                 const totalPixels = canvas.width * canvas.height;
                 scratchPercentage = (transparentPixels / totalPixels) * 100;
                 
-                // 40% 이상 지워졌을 때 전체 공개
-                if (scratchPercentage > 40 && canvas.style.opacity !== '0') {
+                // 40% 이상 지워졌을 때 결과 공개
+                if (scratchPercentage > 40) {
                     revealAll();
                 }
             }
@@ -477,6 +475,8 @@
                         if (document.getElementById('prize-text').textContent !== '꽝') {
                             createConfetti();
                         }
+                        scratchCompleted = true;  // 스크래치 완료 처리
+                        instructionText.textContent = "당첨 결과를 확인했습니다. 더 이상 긁을 수 없습니다.";  // 안내 메시지
                     }
                 }, 30);
             }
