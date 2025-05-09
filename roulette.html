@@ -12,7 +12,6 @@
       background: #fdfdfd;
       text-align: center;
     }
-
     #needle {
       position: absolute;
       top: 50%;
@@ -25,12 +24,11 @@
       border-left: 20px solid red;
       z-index: 10;
     }
-
     canvas {
       border-radius: 50%;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: filter 0.2s ease;
     }
-
     button {
       margin-top: 20px;
       padding: 14px 28px;
@@ -42,11 +40,9 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
-
     button:hover {
       background-color: #000;
     }
-
     #result {
       font-size: 20px;
       font-weight: bold;
@@ -57,14 +53,11 @@
 </head>
 <body>
   <h2>🎁 룰렛 이벤트에 참여해 보세요!</h2>
-
   <button onclick="spinWheel()">룰렛 돌리기</button>
-
   <div style="position: relative; width: 300px; height: 300px; margin: 0 auto;">
     <div id="needle"></div>
     <canvas id="canvas" width="300" height="300"></canvas>
   </div>
-
   <p id="result"></p>
 
   <script>
@@ -76,7 +69,6 @@
     const items = ["10% 쿠폰", "무료배송", "꽝!", "추첨권", "5% 쿠폰", "사은품"];
     const colors = ["#FFCDD2", "#F8BBD0", "#C8E6C9", "#BBDEFB", "#D1C4E9", "#FFF9C4"];
     const arc = Math.PI * 2 / items.length;
-
     let angle = 0;
     let spinning = false;
 
@@ -91,7 +83,6 @@
         ctx.fillStyle = colors[i];
         ctx.fill();
         ctx.stroke();
-
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + arc / 2);
@@ -106,8 +97,6 @@
     function spinWheel() {
       if (spinning) return;
       spinning = true;
-
-      // 캐시 초기화
       canvas.width += 1; canvas.width -= 1;
 
       const randIndex = Math.floor(Math.random() * items.length);
@@ -121,12 +110,16 @@
         const progress = Math.min(elapsed / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
         const current = angle + (spinAngle - angle) * eased;
+
+        canvas.style.filter = progress < 1 ? 'blur(1px)' : 'none';
         drawWheel(current);
 
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
-          angle = current % (Math.PI * 2);
+          angle = current % (2 * Math.PI);
+
+          // 결과 계산 수식
           const selected = Math.floor(((2 * Math.PI - (angle % (2 * Math.PI)) + arc / 2) % (2 * Math.PI)) / arc);
           document.getElementById("result").textContent = "당첨 결과: " + items[selected];
           spinning = false;
