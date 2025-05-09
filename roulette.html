@@ -16,12 +16,12 @@
       position: absolute;
       top: 50%;
       left: 100%;
-      transform: translate(-100%, -50%) rotate(0deg); /* 바늘 3시 방향 */
+      transform: translate(-100%, -50%) rotate(0deg); /* 3시 방향 */
       width: 0;
       height: 0;
-      border-top: 10px solid transparent;
-      border-bottom: 10px solid transparent;
-      border-left: 20px solid red;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 14px solid red;
       z-index: 10;
     }
     canvas {
@@ -97,11 +97,12 @@
       if (spinning) return;
       spinning = true;
 
-      // 강제 리렌더링으로 잔상 제거
-      canvas.width += 1; canvas.width -= 1;
+      // 캔버스 잔상 제거
+      canvas.width += 1;
+      canvas.width -= 1;
 
       const randIndex = Math.floor(Math.random() * items.length);
-      const randomOffset = (Math.random() - 0.5) * (arc * 0.6); // ±offset
+      const randomOffset = (Math.random() - 0.5) * (arc * 0.6);
       const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + randomOffset;
       const duration = 3600;
       const start = performance.now();
@@ -110,7 +111,7 @@
         const elapsed = time - start;
         const progress = Math.min(elapsed / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
-        const current = spinAngle * eased;
+        const current = spinAngle * eased; // 누적 없이 독립 계산
 
         canvas.style.filter = progress < 1 ? 'blur(1px)' : 'none';
         drawWheel(current);
@@ -118,9 +119,10 @@
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
-          // current → 최종 각도 (0 ~ 2π)
+          // 회전 각도 기준 바늘이 가리키는 위치 계산
           const finalAngle = current % (2 * Math.PI);
           const selected = Math.floor(((2 * Math.PI - finalAngle + arc / 2) % (2 * Math.PI)) / arc);
+
           document.getElementById("result").textContent = "당첨 결과: " + items[selected];
           spinning = false;
         }
@@ -129,8 +131,7 @@
       requestAnimationFrame(animate);
     }
 
-    // 처음 그리기
-    drawWheel();
+    drawWheel(); // 초기 렌더링
   </script>
 </body>
 </html>
