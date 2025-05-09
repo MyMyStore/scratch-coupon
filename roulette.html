@@ -7,50 +7,51 @@
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden; /* ✅ 스크롤 제거 */
-      font-family: sans-serif;
+      overflow: hidden;
+      font-family: 'Pretendard', sans-serif;
+      background: #fdfdfd;
       text-align: center;
     }
 
-    #canvas {
-      margin-top: 10px;
-    }
-
     #needle {
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 20px solid red;
       position: absolute;
-      top: -10px;
+      top: -20px;
       left: 50%;
-      width: 2px;
-      height: 70px;
-      background: red;
       transform: translateX(-50%);
-      transform-origin: bottom center;
-      animation: wobble 0.2s infinite ease-in-out;
       z-index: 10;
-      box-shadow: 0 0 4px rgba(0,0,0,0.3);
     }
 
-    @keyframes wobble {
-      0% { transform: translateX(-50%) rotate(1deg); }
-      50% { transform: translateX(-50%) rotate(-1deg); }
-      100% { transform: translateX(-50%) rotate(1deg); }
+    canvas {
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
     button {
       margin-top: 20px;
-      padding: 12px 24px;
+      padding: 14px 28px;
       font-size: 16px;
       background-color: #333;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #000;
     }
 
     #result {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
-      margin-top: 15px;
+      margin-top: 20px;
+      color: #f55;
     }
   </style>
 </head>
@@ -75,17 +76,14 @@
     const items = ["10% 쿠폰", "무료배송", "꽝!", "추첨권", "5% 쿠폰", "사은품"];
     const colors = ["#FFCDD2", "#F8BBD0", "#C8E6C9", "#BBDEFB", "#D1C4E9", "#FFF9C4"];
     const arc = Math.PI * 2 / items.length;
-
     let angle = 0;
     let spinning = false;
 
     function drawWheel(currentAngle = 0) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       for (let i = 0; i < items.length; i++) {
         const startAngle = currentAngle + i * arc;
         const endAngle = startAngle + arc;
-
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
@@ -108,11 +106,13 @@
       if (spinning) return;
       spinning = true;
 
+      // 캐시 삭제용: canvas 강제 초기화 (브라우저 최적화 방지용)
+      canvas.width += 1; canvas.width -= 1;
+
       const randIndex = Math.floor(Math.random() * items.length);
-      const randomOffset = (Math.random() - 0.5) * (arc * 0.6);  // ±18도 범위
+      const randomOffset = (Math.random() - 0.5) * (arc * 0.6);
       const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + (arc / 2) + randomOffset;
       const duration = 3600;
-
       const start = performance.now();
 
       function animate(time) {
@@ -127,7 +127,11 @@
           requestAnimationFrame(animate);
         } else {
           angle = current % (Math.PI * 2);
-          const selected = (items.length - Math.floor((angle / arc))) % items.length;
+
+          // 정확한 결과 계산 보정
+          const normalizedAngle = (2 * Math.PI - angle + arc / 2) % (2 * Math.PI);
+          const selected = Math.floor(normalizedAngle / arc) % items.length;
+
           document.getElementById("result").textContent = "당첨 결과: " + items[selected];
           spinning = false;
         }
