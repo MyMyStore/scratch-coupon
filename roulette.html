@@ -16,7 +16,7 @@
       position: absolute;
       top: 50%;
       left: 100%;
-      transform: translate(-100%, -50%) rotate(0deg); /* 3시 방향 */
+      transform: translate(-100%, -50%) rotate(0deg);
       width: 0;
       height: 0;
       border-top: 6px solid transparent;
@@ -66,8 +66,14 @@
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = 140;
-    const items = ["10% 쿠폰", "무료배송", "꽝!", "추첨권", "5% 쿠폰", "사은품"];
-    const colors = ["#FFCDD2", "#F8BBD0", "#C8E6C9", "#BBDEFB", "#D1C4E9", "#FFF9C4"];
+
+    // 🎯 확률 조정: 꽝 50%, 나머지 각 10%
+    const items = [
+      "꽝!", "꽝!", "꽝!", "꽝!", "꽝!",
+      "5% 쿠폰", "10% 쿠폰", "무료배송", "추첨권", "사은품"
+    ];
+    const colors = ["#FFCDD2", "#F8BBD0", "#C8E6C9", "#BBDEFB", "#D1C4E9",
+                    "#FFF9C4", "#FFE0B2", "#E1BEE7", "#B2EBF2", "#DCEDC8"];
     const arc = Math.PI * 2 / items.length;
     let spinning = false;
 
@@ -79,7 +85,7 @@
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-        ctx.fillStyle = colors[i];
+        ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
         ctx.stroke();
         ctx.save();
@@ -94,6 +100,15 @@
     }
 
     function spinWheel() {
+      // ✅ 1일 1회 제한 (localStorage)
+      const today = new Date().toISOString().slice(0, 10);
+      const lastPlay = localStorage.getItem("lastPlayDate");
+      if (lastPlay === today) {
+        alert("오늘은 이미 참여하셨어요! 내일 다시 도전해 주세요.");
+        return;
+      }
+      localStorage.setItem("lastPlayDate", today);
+
       if (spinning) return;
       spinning = true;
 
@@ -111,7 +126,7 @@
         const elapsed = time - start;
         const progress = Math.min(elapsed / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
-        const current = spinAngle * eased; // 누적 없이 독립 계산
+        const current = spinAngle * eased;
 
         canvas.style.filter = progress < 1 ? 'blur(1px)' : 'none';
         drawWheel(current);
@@ -119,10 +134,8 @@
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
-          // 회전 각도 기준 바늘이 가리키는 위치 계산
           const finalAngle = current % (2 * Math.PI);
           const selected = Math.floor(((2 * Math.PI - finalAngle + arc / 2) % (2 * Math.PI)) / arc);
-
           document.getElementById("result").textContent = "당첨 결과: " + items[selected];
           spinning = false;
         }
