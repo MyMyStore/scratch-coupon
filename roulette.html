@@ -4,80 +4,112 @@
   <meta charset="UTF-8">
   <title>룰렛</title>
   <style>
-    #wheel {
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      border: 10px solid #eee;
-      position: relative;
-      margin: 0 auto;
-      background: conic-gradient(
-        #f99 0% 16.6%, #fc9 16.6% 33.3%, #9f9 33.3% 50%,
-        #9cf 50% 66.6%, #ccf 66.6% 83.3%, #f9f 83.3% 100%
-      );
-      transition: transform 3s ease-out;
+    body {
+      font-family: sans-serif;
+      text-align: center;
     }
-    .label {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0; left: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 16px;
+    #canvas {
+      margin-top: 20px;
     }
-    .label span {
+    #needle {
       position: absolute;
-      transform-origin: 50% 150px;
-    }
-    #pointer {
-      position: absolute;
-      top: -20px;
+      top: 20px;
       left: 50%;
+      width: 4px;
+      height: 60px;
+      background: red;
       transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 10px solid transparent;
-      border-right: 10px solid transparent;
-      border-bottom: 20px solid red;
+      transform-origin: bottom center;
+      animation: wobble 0.2s infinite ease-in-out;
+      z-index: 10;
+    }
+    @keyframes wobble {
+      0% { transform: translateX(-50%) rotate(1deg); }
+      50% { transform: translateX(-50%) rotate(-1deg); }
+      100% { transform: translateX(-50%) rotate(1deg); }
     }
   </style>
 </head>
 <body>
-  <div id="wheel-container" style="position:relative; width:300px; margin:auto;">
-    <div id="wheel">
-      <div id="pointer"></div>
-      <div class="label">
-        <span style="transform: rotate(30deg);">10% 쿠폰</span>
-        <span style="transform: rotate(90deg);">무료배송</span>
-        <span style="transform: rotate(150deg);">꽝!</span>
-        <span style="transform: rotate(210deg);">추첨권</span>
-        <span style="transform: rotate(270deg);">5% 쿠폰</span>
-        <span style="transform: rotate(330deg);">사은품</span>
-      </div>
-    </div>
+  <h2>🎁 룰렛 이벤트에 참여해 보세요!</h2>
+  <div style="position: relative; width: 320px; margin: 0 auto;">
+    <div id="needle"></div>
+    <canvas id="canvas" width="300" height="300"></canvas>
   </div>
-  <div style="text-align:center; margin-top:20px;">
-    <button onclick="spin()" style="padding:10px 20px;">룰렛 돌리기</button>
-    <p id="result-text" style="font-size:18px; font-weight:bold; margin-top:10px;"></p>
-  </div>
+  <button onclick="spinWheel()" style="margin-top: 20px; padding: 10px 20px;">룰렛 돌리기</button>
+  <p id="result" style="font-size: 18px; font-weight: bold; margin-top: 15px;"></p>
 
   <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 140;
     const items = ["10% 쿠폰", "무료배송", "꽝!", "추첨권", "5% 쿠폰", "사은품"];
-    const wheel = document.getElementById("wheel");
-    const resultText = document.getElementById("result-text");
+    const colors = ["#FFCDD2", "#F8BBD0", "#C8E6C9", "#BBDEFB", "#D1C4E9", "#FFF9C4"];
+    const arc = Math.PI * 2 / items.length;
 
-    function spin() {
-      const randIndex = Math.floor(Math.random() * items.length);
-      const rotateDeg = 360 * 5 + (randIndex * 60); // 총 6칸 → 60도 간격
-      wheel.style.transform = `rotate(${rotateDeg}deg)`;
+    let angle = 0;
+    let spinning = false;
 
-      setTimeout(() => {
-        resultText.textContent = "당첨 결과: " + items[randIndex];
-      }, 3100);
+    function drawWheel(currentAngle = 0) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < items.length; i++) {
+        const startAngle = currentAngle + i * arc;
+        const endAngle = startAngle + arc;
+
+        // 각 칸 색상
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.fillStyle = colors[i];
+        ctx.fill();
+        ctx.stroke();
+
+        // 텍스트
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + arc / 2);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#000";
+        ctx.font = "14px sans-serif";
+        ctx.fillText(items[i], radius - 40, 0);
+        ctx.restore();
+      }
     }
+
+    function spinWheel() {
+      if (spinning) return;
+      spinning = true;
+
+      const randIndex = Math.floor(Math.random() * items.length);
+      const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + (arc / 2); // 중심 보정
+      const duration = 3000;
+      const start = performance.now();
+
+      function animate(time) {
+        const elapsed = time - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out
+        const current = angle + (spinAngle - angle) * eased;
+
+        drawWheel(current);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          angle = current % (Math.PI * 2);
+          const selected = (items.length - Math.floor((angle / arc))) % items.length;
+          document.getElementById("result").textContent = "당첨 결과: " + items[selected];
+          spinning = false;
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    drawWheel();
   </script>
 </body>
 </html>
