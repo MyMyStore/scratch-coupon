@@ -16,7 +16,7 @@
       position: absolute;
       top: 50%;
       left: 100%;
-      transform: translate(-100%, -50%) rotate(90deg);
+      transform: translate(-100%, -50%) rotate(0deg); /* 오른쪽 정각 */
       width: 0;
       height: 0;
       border-top: 10px solid transparent;
@@ -97,11 +97,14 @@
     function spinWheel() {
       if (spinning) return;
       spinning = true;
+
+      // 캐시 제거용 canvas 리셋
       canvas.width += 1; canvas.width -= 1;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const randIndex = Math.floor(Math.random() * items.length);
       const randomOffset = (Math.random() - 0.5) * (arc * 0.6);
-      const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + (arc / 2) + randomOffset;
+      const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + randomOffset;
       const duration = 3600;
       const start = performance.now();
 
@@ -119,8 +122,10 @@
         } else {
           angle = current % (2 * Math.PI);
 
-          // 결과 계산 수식
-          const selected = Math.floor(((2 * Math.PI - (angle % (2 * Math.PI)) + arc / 2) % (2 * Math.PI)) / arc);
+          // 바늘이 3시 방향을 가리키므로 angle을 그대로 사용해 인덱스 계산
+          // arc의 시작점이 시계 방향이기 때문에 2π에서 angle을 빼줌
+          const selected = Math.floor(((2 * Math.PI - angle + arc / 2) % (2 * Math.PI)) / arc);
+
           document.getElementById("result").textContent = "당첨 결과: " + items[selected];
           spinning = false;
         }
