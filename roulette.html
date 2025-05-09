@@ -16,7 +16,7 @@
       position: absolute;
       top: 50%;
       left: 100%;
-      transform: translate(-100%, -50%) rotate(0deg); /* 오른쪽 정각 */
+      transform: translate(-100%, -50%) rotate(0deg); /* 바늘 3시 방향 */
       width: 0;
       height: 0;
       border-top: 10px solid transparent;
@@ -69,7 +69,6 @@
     const items = ["10% 쿠폰", "무료배송", "꽝!", "추첨권", "5% 쿠폰", "사은품"];
     const colors = ["#FFCDD2", "#F8BBD0", "#C8E6C9", "#BBDEFB", "#D1C4E9", "#FFF9C4"];
     const arc = Math.PI * 2 / items.length;
-    let angle = 0;
     let spinning = false;
 
     function drawWheel(currentAngle = 0) {
@@ -98,12 +97,11 @@
       if (spinning) return;
       spinning = true;
 
-      // 캐시 제거용 canvas 리셋
+      // 강제 리렌더링으로 잔상 제거
       canvas.width += 1; canvas.width -= 1;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const randIndex = Math.floor(Math.random() * items.length);
-      const randomOffset = (Math.random() - 0.5) * (arc * 0.6);
+      const randomOffset = (Math.random() - 0.5) * (arc * 0.6); // ±offset
       const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + randomOffset;
       const duration = 3600;
       const start = performance.now();
@@ -112,7 +110,7 @@
         const elapsed = time - start;
         const progress = Math.min(elapsed / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
-        const current = angle + (spinAngle - angle) * eased;
+        const current = spinAngle * eased;
 
         canvas.style.filter = progress < 1 ? 'blur(1px)' : 'none';
         drawWheel(current);
@@ -120,12 +118,9 @@
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
-          angle = current % (2 * Math.PI);
-
-          // 바늘이 3시 방향을 가리키므로 angle을 그대로 사용해 인덱스 계산
-          // arc의 시작점이 시계 방향이기 때문에 2π에서 angle을 빼줌
-          const selected = Math.floor(((2 * Math.PI - angle + arc / 2) % (2 * Math.PI)) / arc);
-
+          // current → 최종 각도 (0 ~ 2π)
+          const finalAngle = current % (2 * Math.PI);
+          const selected = Math.floor(((2 * Math.PI - finalAngle + arc / 2) % (2 * Math.PI)) / arc);
           document.getElementById("result").textContent = "당첨 결과: " + items[selected];
           spinning = false;
         }
@@ -134,6 +129,7 @@
       requestAnimationFrame(animate);
     }
 
+    // 처음 그리기
     drawWheel();
   </script>
 </body>
