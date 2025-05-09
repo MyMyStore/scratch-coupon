@@ -4,14 +4,16 @@
   <meta charset="UTF-8">
   <title>룰렛 이벤트</title>
   <style>
-    body {
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* ✅ 스크롤 제거 */
       font-family: sans-serif;
       text-align: center;
-      padding: 20px;
     }
 
     #canvas {
-      margin-top: 20px;
+      margin-top: 10px;
     }
 
     #needle {
@@ -35,7 +37,7 @@
     }
 
     button {
-      margin-bottom: 20px;
+      margin-top: 20px;
       padding: 12px 24px;
       font-size: 16px;
       background-color: #333;
@@ -48,14 +50,13 @@
     #result {
       font-size: 18px;
       font-weight: bold;
-      margin-top: 20px;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
   <h2>🎁 룰렛 이벤트에 참여해 보세요!</h2>
 
-  <!-- 버튼 먼저 -->
   <button onclick="spinWheel()">룰렛 돌리기</button>
 
   <div style="position: relative; width: 320px; margin: 0 auto;">
@@ -108,7 +109,7 @@
       spinning = true;
 
       const randIndex = Math.floor(Math.random() * items.length);
-      const randomOffset = (Math.random() - 0.5) * (arc * 0.6);  // ± 약 18도
+      const randomOffset = (Math.random() - 0.5) * (arc * 0.6);  // ±18도 범위
       const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + (arc / 2) + randomOffset;
       const duration = 3600;
 
