@@ -2,42 +2,68 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>룰렛</title>
+  <title>룰렛 이벤트</title>
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
+      padding: 20px;
     }
+
     #canvas {
       margin-top: 20px;
     }
+
     #needle {
       position: absolute;
-      top: 20px;
+      top: -10px;
       left: 50%;
-      width: 4px;
-      height: 60px;
+      width: 2px;
+      height: 70px;
       background: red;
       transform: translateX(-50%);
       transform-origin: bottom center;
       animation: wobble 0.2s infinite ease-in-out;
       z-index: 10;
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
     }
+
     @keyframes wobble {
       0% { transform: translateX(-50%) rotate(1deg); }
       50% { transform: translateX(-50%) rotate(-1deg); }
       100% { transform: translateX(-50%) rotate(1deg); }
     }
+
+    button {
+      margin-bottom: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #result {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <h2>🎁 룰렛 이벤트에 참여해 보세요!</h2>
+
+  <!-- 버튼 먼저 -->
+  <button onclick="spinWheel()">룰렛 돌리기</button>
+
   <div style="position: relative; width: 320px; margin: 0 auto;">
     <div id="needle"></div>
     <canvas id="canvas" width="300" height="300"></canvas>
   </div>
-  <button onclick="spinWheel()" style="margin-top: 20px; padding: 10px 20px;">룰렛 돌리기</button>
-  <p id="result" style="font-size: 18px; font-weight: bold; margin-top: 15px;"></p>
+
+  <p id="result"></p>
 
   <script>
     const canvas = document.getElementById("canvas");
@@ -59,7 +85,6 @@
         const startAngle = currentAngle + i * arc;
         const endAngle = startAngle + arc;
 
-        // 각 칸 색상
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
@@ -67,7 +92,6 @@
         ctx.fill();
         ctx.stroke();
 
-        // 텍스트
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + arc / 2);
@@ -84,14 +108,16 @@
       spinning = true;
 
       const randIndex = Math.floor(Math.random() * items.length);
-      const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + (arc / 2); // 중심 보정
-      const duration = 3000;
+      const randomOffset = (Math.random() - 0.5) * (arc * 0.6);  // ± 약 18도
+      const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + (arc / 2) + randomOffset;
+      const duration = 3600;
+
       const start = performance.now();
 
       function animate(time) {
         const elapsed = time - start;
         const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3); // ease-out
+        const eased = 1 - Math.pow(1 - progress, 3);
         const current = angle + (spinAngle - angle) * eased;
 
         drawWheel(current);
