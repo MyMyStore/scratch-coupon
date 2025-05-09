@@ -50,6 +50,10 @@
       color: #f55;
     }
   </style>
+  
+  <!-- jQuery 로드 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 <body>
   <h2>🎁 룰렛 이벤트에 참여해 보세요!</h2>
@@ -61,107 +65,109 @@
   <p id="result"></p>
 
   <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = 140;
+    $(document).ready(function() {
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 140;
 
-    // 항목 목록
-    const items = [
-      "꽝!",        // 0
-      "5% 쿠폰",    // 1
-      "10% 쿠폰",   // 2
-      "무료배송",   // 3
-      "사은품",     // 4
-      "추첨권"      // 5
-    ];
+      // 항목 목록
+      const items = [
+        "꽝!",        // 0
+        "5% 쿠폰",    // 1
+        "10% 쿠폰",   // 2
+        "무료배송",   // 3
+        "사은품",     // 4
+        "추첨권"      // 5
+      ];
 
-    // 색상 목록
-    const colors = [
-      "#FFCDD2", "#F8BBD0", "#C8E6C9", "#BBDEFB", "#FFE082", "#D1C4E9"
-    ];
+      // 색상 목록
+      const colors = [
+        "#FFCDD2", "#F8BBD0", "#C8E6C9", "#BBDEFB", "#FFE082", "#D1C4E9"
+      ];
 
-    const arc = Math.PI * 2 / items.length;
+      const arc = Math.PI * 2 / items.length;
 
-    // 확률 기반 인덱스 (총 10개 → 확률 분포)
-    const weightedItems = [
-      0, 0, 0, 0, 0,    // 꽝 50%
-      1,                // 5% 쿠폰
-      2,                // 10% 쿠폰
-      3,                // 무료배송
-      4, 4,             // 사은품 15%
-      5                 // 추첨권 5%
-    ];
+      // 확률 기반 인덱스 (총 10개 → 확률 분포)
+      const weightedItems = [
+        0, 0, 0, 0, 0,    // 꽝 50%
+        1,                // 5% 쿠폰
+        2,                // 10% 쿠폰
+        3,                // 무료배송
+        4, 4,             // 사은품 15%
+        5                 // 추첨권 5%
+      ];
 
-    let spinning = false;
+      let spinning = false;
 
-    function drawWheel(currentAngle = 0) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < items.length; i++) {
-        const startAngle = currentAngle + i * arc;
-        const endAngle = startAngle + arc;
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.fill();
-        ctx.stroke();
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(startAngle + arc / 2);
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#000";
-        ctx.font = "14px sans-serif";
-        ctx.fillText(items[i], radius - 40, 0);
-        ctx.restore();
-      }
-    }
-
-    function spinWheel() {
-      // 1일 1회 제한
-      const today = new Date().toISOString().slice(0, 10);
-      const lastPlay = localStorage.getItem("lastPlayDate");
-      if (lastPlay === today) {
-        alert("오늘은 이미 참여하셨어요! 내일 다시 도전해 주세요.");
-        return;
-      }
-      localStorage.setItem("lastPlayDate", today);
-
-      if (spinning) return;
-      spinning = true;
-
-      canvas.width += 1; canvas.width -= 1; // 캐시 리셋
-
-      const randIndex = weightedItems[Math.floor(Math.random() * weightedItems.length)];
-      const randomOffset = (Math.random() - 0.5) * (arc * 0.6);
-      const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + randomOffset;
-      const duration = 3600;
-      const start = performance.now();
-
-      function animate(time) {
-        const elapsed = time - start;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = spinAngle * eased;
-
-        canvas.style.filter = progress < 1 ? 'blur(1px)' : 'none';
-        drawWheel(current);
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          const finalAngle = current % (2 * Math.PI);
-          const selected = Math.floor(((2 * Math.PI - finalAngle + arc / 2) % (2 * Math.PI)) / arc);
-          document.getElementById("result").textContent = "당첨 결과: " + items[selected];
-          spinning = false;
+      function drawWheel(currentAngle = 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < items.length; i++) {
+          const startAngle = currentAngle + i * arc;
+          const endAngle = startAngle + arc;
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.fill();
+          ctx.stroke();
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.rotate(startAngle + arc / 2);
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#000";
+          ctx.font = "14px sans-serif";
+          ctx.fillText(items[i], radius - 40, 0);
+          ctx.restore();
         }
       }
 
-      requestAnimationFrame(animate);
-    }
+      function spinWheel() {
+        // 1일 1회 제한
+        const today = new Date().toISOString().slice(0, 10);
+        const lastPlay = localStorage.getItem("lastPlayDate");
+        if (lastPlay === today) {
+          alert("오늘은 이미 참여하셨어요! 내일 다시 도전해 주세요.");
+          return;
+        }
+        localStorage.setItem("lastPlayDate", today);
 
-    drawWheel();
+        if (spinning) return;
+        spinning = true;
+
+        canvas.width += 1; canvas.width -= 1; // 캐시 리셋
+
+        const randIndex = weightedItems[Math.floor(Math.random() * weightedItems.length)];
+        const randomOffset = (Math.random() - 0.5) * (arc * 0.6);
+        const spinAngle = (Math.PI * 2 * 5) + (randIndex * arc) + randomOffset;
+        const duration = 3600;
+        const start = performance.now();
+
+        function animate(time) {
+          const elapsed = time - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = spinAngle * eased;
+
+          canvas.style.filter = progress < 1 ? 'blur(1px)' : 'none';
+          drawWheel(current);
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            const finalAngle = current % (2 * Math.PI);
+            const selected = Math.floor(((2 * Math.PI - finalAngle + arc / 2) % (2 * Math.PI)) / arc);
+            document.getElementById("result").textContent = "당첨 결과: " + items[selected];
+            spinning = false;
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      drawWheel();
+    });
   </script>
 </body>
 </html>
