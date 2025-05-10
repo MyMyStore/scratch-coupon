@@ -65,7 +65,10 @@
   <p id="result"></p>
 
   <script>
-    $(document).ready(function() {
+    // jQuery noConflict 모드 사용
+    var $j = jQuery.noConflict();
+
+    $j(document).ready(function() {
       const canvas = document.getElementById("canvas");
       const ctx = canvas.getContext("2d");
       const centerX = canvas.width / 2;
