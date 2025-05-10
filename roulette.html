@@ -127,15 +127,6 @@
       }
 
       function spinWheel() {
-        // 1일 1회 제한
-        const today = new Date().toISOString().slice(0, 10);
-        const lastPlay = localStorage.getItem("lastPlayDate");
-        if (lastPlay === today) {
-          alert("오늘은 이미 참여하셨어요! 내일 다시 도전해 주세요.");
-          return;
-        }
-        localStorage.setItem("lastPlayDate", today);
-
         if (spinning) return;
         spinning = true;
 
