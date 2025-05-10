@@ -15,14 +15,14 @@
     #needle {
       position: absolute;
       top: 50%;
-      left: 100%;
-      transform: translate(-100%, -50%) rotate(0deg);
+      left: 50%;
       width: 0;
       height: 0;
       border-top: 6px solid transparent;
       border-bottom: 6px solid transparent;
       border-left: 14px solid red;
       z-index: 10;
+      transform: translate(-50%, -100%) rotate(0deg);
     }
     canvas {
       border-radius: 50%;
@@ -57,7 +57,7 @@
 </head>
 <body>
   <h2>🎁 룰렛 이벤트에 참여해 보세요!</h2>
-  <button onclick="spinWheel()">룰렛 돌리기</button>
+  <button id="spinButton">룰렛 돌리기</button>
   <div style="position: relative; width: 300px; height: 300px; margin: 0 auto;">
     <div id="needle"></div>
     <canvas id="canvas" width="300" height="300"></canvas>
@@ -68,6 +68,7 @@
     // jQuery noConflict 모드 사용
     var $j = jQuery.noConflict();
 
+    // DOM 준비 완료 후 실행
     $j(document).ready(function() {
       const canvas = document.getElementById("canvas");
       const ctx = canvas.getContext("2d");
@@ -126,6 +127,7 @@
         }
       }
 
+      // 룰렛 돌리기 함수
       function spinWheel() {
         if (spinning) return;
         spinning = true;
@@ -147,6 +149,9 @@
           canvas.style.filter = progress < 1 ? 'blur(1px)' : 'none';
           drawWheel(current);
 
+          const needle = document.getElementById("needle");
+          needle.style.transform = `translate(-50%, -100%) rotate(${current * (180 / Math.PI)}deg)`; // 바늘 회전
+
           if (progress < 1) {
             requestAnimationFrame(animate);
           } else {
@@ -159,6 +164,11 @@
 
         requestAnimationFrame(animate);
       }
+
+      // 버튼 클릭 이벤트
+      $j("#spinButton").on("click", function() {
+        spinWheel();
+      });
 
       drawWheel();
     });
